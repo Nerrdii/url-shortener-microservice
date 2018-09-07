@@ -1,0 +1,30 @@
+{
+  "name": "url-shortener-microservice",
+  "version": "1.0.0",
+  "description": "Creates shortened URLs for valid websites",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "microservice",
+    "freecodecamp",
+    "urlshortener"
+  ],
+  "author": "Joseph Davis <joseph@josephndavis.com> (https://www.josephndavis.com)",
+  "repository": "git@github.com:MrWhiteNerdy/url-shortener-microservice.git",
+  "homepage": "https://fierce-brushlands-75804.herokuapp.com",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "mongoose": "^5.2.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.3"
+  }
+}
