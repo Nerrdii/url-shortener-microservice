@@ -31,7 +31,7 @@ app.get('/api/shorturl/:id', async (req, res) => {
   const id = req.params['id'];
 
   try {
-    const existingUrl = await Url.find({ id });
+    const existingUrl = await Url.findById(id);
 
     if (existingUrl) {
       res.redirect(existingUrl.originalUrl);
@@ -43,16 +43,27 @@ app.get('/api/shorturl/:id', async (req, res) => {
   }
 });
 
-app.post('/api/shorturl/new', async (req, res) => {
+app.post('/api/shorturl/new', async (req, res, next) => {
   const urlBody = req.body['url'];
 
   const validUrl = isValidUrl(urlBody);
-  const validDns = await isValidDns(urlBody);
 
-  if (!validUrl || !validDns) {
+  try {
+    if (!validUrl) {
+      res.send({
+        error: 'invalid URL'
+      });
+
+      next();
+    }
+
+    await isValidDns(extractHostname(urlBody));
+  } catch (err) {
     res.send({
       error: 'invalid URL'
     });
+
+    next();
   }
 
   const existingUrl = await Url.findOne({ originalUrl: urlBody });
@@ -60,11 +71,14 @@ app.post('/api/shorturl/new', async (req, res) => {
   if (existingUrl) {
     res.json({
       original_url: existingUrl.originalUrl,
-      short_url: existingUrl._id
+      short_url: `${getHostName(req)}/api/shorturl/${existingUrl._id}`
     });
   } else {
     const url = await new Url({ originalUrl: urlBody }).save();
-    res.json({ original_url: url.originalUrl, short_url: url._id });
+    res.json({
+      original_url: url.originalUrl,
+      short_url: `${getHostName(req)}/api/shorturl/${url._id}`
+    });
   }
 });
 
@@ -76,13 +90,25 @@ function isValidUrl(url) {
 function isValidDns(url) {
   return new Promise((resolve, reject) => {
     dns.lookup(url, err => {
-      if (err) {
-        reject(err);
-      }
+      if (err) reject(err);
 
       resolve();
     });
   });
+}
+
+function getHostName(req) {
+  const port = PORT === 80 ? '' : `:${PORT}`;
+  return `${req.protocol}://${req.hostname}${port}`;
+}
+
+function extractHostname(url) {
+  let hostname =
+    url.indexOf('//') > -1 ? url.split('/')[2] : (hostname = url.split('/')[0]);
+  hostname = hostname.split(':')[0];
+  hostname = hostname.split('?')[0];
+
+  return hostname;
 }
 
 const PORT = process.env.PORT || 5000;
