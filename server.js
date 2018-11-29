@@ -98,7 +98,7 @@ function isValidDns(url) {
 }
 
 function getHostName(req) {
-  const port = PORT === 80 ? '' : `:${PORT}`;
+  const port = PORT !== 5000 ? '' : `:${PORT}`;
   return `${req.protocol}://${req.hostname}${port}`;
 }
 
