@@ -31,10 +31,6 @@
       </ol>
 
       <h3>Short URL Creation</h3>
-      <p>
-        Example: <code>POST /api/shorturl/new</code> -
-        <code>https://www.google.com</code>
-      </p>
       <form action="api/shorturl/new" method="POST">
         <label for="url_input">URL to be shortened:</label>
         <input
@@ -45,11 +41,15 @@
         />
         <input type="submit" value="POST URL" />
       </form>
-      <h3>Example Usage:</h3>
-      <code>/api/shorturl/3</code>
+      <h3>Example Usage</h3>
+      <h4><code>POST</code></h4>
+      <code>/api/shorturl/new</code>
+      <p>body:</p>
+      <code>{ "url": "https://www.google.com" }</code>
+      <h4><code>GET</code></h4>
+      <code>/api/shorturl/5bff426af8853c1384f86d82</code>
 
-      <h3>Will Redirect to:</h3>
-      <p>https://www.google.com</p>
+      <p>will redirect to <a href="https://www.google.com">Google</a></p>
     </div>
   </body>
 </html>
