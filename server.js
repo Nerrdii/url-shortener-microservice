@@ -12,10 +12,9 @@ const Url = mongoose.model('urls');
 
 const app = express();
 
-mongoose.connect(
-  config.mongoURI,
-  { useNewUrlParser: true }
-);
+mongoose.connect(config.mongoURI, () => {
+  console.log('Connected to MongoDB');
+});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -38,7 +37,7 @@ app.get('/api/shorturl/:id', async (req, res) => {
     }
   } catch (err) {
     res.json({
-      error: 'short url does not exist'
+      error: 'short url does not exist',
     });
   }
 });
@@ -51,7 +50,7 @@ app.post('/api/shorturl/new', async (req, res, next) => {
   try {
     if (!validUrl) {
       res.send({
-        error: 'invalid URL'
+        error: 'invalid URL',
       });
 
       next();
@@ -60,7 +59,7 @@ app.post('/api/shorturl/new', async (req, res, next) => {
     await isValidDns(extractHostname(urlBody));
   } catch (err) {
     res.send({
-      error: 'invalid URL'
+      error: 'invalid URL',
     });
 
     next();
@@ -71,25 +70,26 @@ app.post('/api/shorturl/new', async (req, res, next) => {
   if (existingUrl) {
     res.json({
       original_url: existingUrl.originalUrl,
-      short_url: `${getHostName(req)}/api/shorturl/${existingUrl._id}`
+      short_url: `${getHostName(req)}/api/shorturl/${existingUrl._id}`,
     });
   } else {
     const url = await new Url({ originalUrl: urlBody }).save();
     res.json({
       original_url: url.originalUrl,
-      short_url: `${getHostName(req)}/api/shorturl/${url._id}`
+      short_url: `${getHostName(req)}/api/shorturl/${url._id}`,
     });
   }
 });
 
 function isValidUrl(url) {
-  const urlRegex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+  const urlRegex =
+    /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
   return urlRegex.test(url);
 }
 
 function isValidDns(url) {
   return new Promise((resolve, reject) => {
-    dns.lookup(url, err => {
+    dns.lookup(url, (err) => {
       if (err) reject(err);
 
       resolve();
